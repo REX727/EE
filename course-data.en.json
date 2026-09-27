@@ -1,0 +1,1859 @@
+[
+  {
+    "title": "Circuits, energy and signals",
+    "goal": "Draw separate power and signal diagrams, and explain the role of each wire.",
+    "concepts": [
+      [
+        "Start with a complete loop",
+        "Current needs a closed path. A source supplies energy; a load converts it into light, heat or motion. Electric charge is not used up after passing through an LED. A schematic shows electrical connections, not physical positions on your desk."
+      ],
+      [
+        "Voltage needs a reference",
+        "A point described as 3.3 V is 3.3 V relative to another point. GND is normally the chosen reference and return network; it is not necessarily earth. Ordinary non-isolated GPIO connections need a common reference. Sharing ground does not mean connecting every positive supply together."
+      ],
+      [
+        "Control wires and power wires",
+        "A microcontroller provides control signals; a driver handles load current. Replacing an LED with a motor requires more than changing the load. Motor power and switching interference need appropriate circuits."
+      ],
+      [
+        "Use your hardware as examples",
+        "The Pi 5 runs Linux and higher-level software. The ESP32-C3 handles I/O, and Arduino is an ecosystem that can program it. The corresponding official Yahboom four-channel board includes an STM32 for motors and encoders. Verify your actual revision before relying on this; adding an ESP32 to a working car is optional."
+      ]
+    ],
+    "example": "For a button-controlled car, separate two paths: button → controller → driver carries information; battery → driver → motor → battery carries energy. The button does not need to carry the current of all the motors.",
+    "diagram": "Signal: button → ESP32 / Pi → driver\nPower: battery + → driver → motor → return → battery −",
+    "steps": [
+      "Disconnect power and list the exact boards and battery models. Mark unknown specifications as unconfirmed.",
+      "Back up the working car software and settings before changing anything.",
+      "Draw one power diagram and one signal diagram.",
+      "Trace a complete LED or motor circuit, including every ground connection.",
+      "Explain which disconnected wire would remove power and which would only remove commands."
+    ],
+    "evidence": "A hardware list, power diagram and signal diagram, with unknown voltages clearly marked.",
+    "understand": [
+      "I can trace a complete current loop.",
+      "I can distinguish ground, signals and positive power rails.",
+      "I can explain the roles of the Pi, ESP32 and driver."
+    ],
+    "quiz": [
+      "Can a switch control an LED from different positions in the same series loop?",
+      "Why does a common ground not mean joining positive supplies?",
+      "How can a microcontroller control a much more powerful load?"
+    ],
+    "challenge": "Draw power and signal diagrams for a sensor-controlled fan. Identify the required driver.",
+    "gear": "A breadboard, multimeter and basic components; paper calculations are also useful.",
+    "code": "",
+    "refs": [
+      "quad",
+      "c3"
+    ],
+    "fault": "If the result differs from your prediction, disconnect power and check the wiring, units and component specifications. Change one thing at a time, then repeat the measurement.",
+    "terms": [
+      [
+        "circuit",
+        "電路"
+      ],
+      [
+        "load",
+        "負載"
+      ],
+      [
+        "ground",
+        "接地／參考地"
+      ],
+      [
+        "signal",
+        "訊號"
+      ]
+    ]
+  },
+  {
+    "title": "Voltage, current, resistance and power",
+    "goal": "Choose an LED resistor using Ohm’s law and interpret a power supply label.",
+    "concepts": [
+      [
+        "Get the units right",
+        "V measures voltage, A current, Ω resistance and W power. 1 mA = 0.001 A; 1 kΩ = 1000 Ω. For a resistor, V = IR. Power is P = VI; for a resistor it is also I²R or V²/R."
+      ],
+      [
+        "A current rating describes capability",
+        "A 5 V / 3 A supply can provide that current under its specified conditions. It does not force 3 A into every load. Incorrect voltage, a short circuit or excessive demand can still cause failure."
+      ],
+      [
+        "An LED needs current limiting",
+        "An LED is not a fixed resistor. Its forward voltage Vf depends on colour, current and temperature. A series resistor limits current. GPIO pins have their own current limits, so start with a low-current example."
+      ],
+      [
+        "Calculate power to understand heat",
+        "Resistors have power ratings. Regulators and drivers also dissipate heat. Maximum ratings depend on operating conditions; allow margin instead of running continuously at the limit."
+      ]
+    ],
+    "example": "With 3.3 V, a red LED with an assumed Vf of 2.0 V, and a target of 4 mA: R = (3.3 − 2.0) / 0.004 = 325 Ω. Choose 330 Ω. The resistor dissipates about 0.005 W. Using 1 kΩ instead gives approximately 1.3 mA.",
+    "diagram": "3V3 ── 330 Ω ── LED (anode → cathode) ── GND\nMeasure resistor voltage VR; estimate I = VR / R.",
+    "steps": [
+      "Calculate the expected current with 330 Ω and 1 kΩ. Write down your assumed LED forward voltage.",
+      "If you have not used a multimeter, do the calculations now and return after Unit 04.",
+      "With power off, connect 3V3 → resistor → LED → GND. Check polarity and breadboard connections.",
+      "Power the board by USB and measure the resistor and LED voltages. Never place a meter in current mode across a supply.",
+      "Disconnect power before changing the resistor. Repeat the measurements and compare the sum of the voltage drops with the supply."
+    ],
+    "evidence": "A comparison of predicted current, measured voltage drops, calculated current and brightness for both resistors.",
+    "understand": [
+      "I can convert mA to A before using a formula.",
+      "I can calculate an LED resistor and its power dissipation.",
+      "I know supply current capability differs from actual load current."
+    ],
+    "quiz": [
+      "What resistor gives 3 mA from 3.3 V if Vf is 2.1 V?",
+      "Does a 5 A supply force 5 A through an LED?",
+      "Why is an LED not a fixed resistor?"
+    ],
+    "challenge": "Try a different LED colour. Check its Vf range before calculating, then compare the measurement with your approximation.",
+    "gear": "A red LED, 330 Ω and 1 kΩ resistors, a 3.3 V supply and a multimeter.",
+    "code": "",
+    "refs": [],
+    "fault": "If the result differs from your prediction, disconnect power and check the wiring, units and component specifications. Change one thing at a time, then repeat the measurement.",
+    "terms": [
+      [
+        "voltage",
+        "電壓"
+      ],
+      [
+        "current",
+        "電流"
+      ],
+      [
+        "resistance",
+        "電阻"
+      ],
+      [
+        "power dissipation",
+        "耗散功率"
+      ]
+    ]
+  },
+  {
+    "title": "Series, parallel and voltage dividers",
+    "goal": "Predict branch currents and node voltages, and recognise a divider’s limits.",
+    "concepts": [
+      [
+        "Series components share current",
+        "Current is the same along a path with no branches. Series resistances add. Around a complete loop, voltage rises and drops sum to zero: an intuitive form of Kirchhoff’s voltage law."
+      ],
+      [
+        "Parallel components share voltage",
+        "Components connected to the same two nodes have the same voltage. Current divides between branches; total current entering a node equals total current leaving it. Parallel resistance follows 1/Req = 1/R1 + 1/R2. Two equal resistors in parallel have half the resistance of one."
+      ],
+      [
+        "The divider equation has conditions",
+        "For an upper R1 and lower R2, the unloaded output is Vout = Vin × R2 / (R1 + R2), measured relative to ground. Adding a load RL makes the lower resistance R2 in parallel with RL, usually reducing Vout."
+      ],
+      [
+        "Scaling a signal is not powering a device",
+        "A divider can be useful for low-current measurements. It is not a regulator for an ESP32 or motor. ADC connections also require checks of voltage limits, source impedance, sampling, calibration and protection."
+      ]
+    ],
+    "example": "With 3.3 V and two 10 kΩ resistors, unloaded Vout is 1.65 V. Add a 10 kΩ load to ground: the lower equivalent is 5 kΩ, so Vout = 3.3 × 5 / (10 + 5) = 1.10 V.",
+    "diagram": "3V3 ── R1 ──●── R2 ── GND\n             └── RL ── GND\n             Vout relative to GND",
+    "steps": [
+      "Calculate 1 kΩ + 2 kΩ in series, and two 10 kΩ resistors in parallel.",
+      "With power off, build a divider from two 10 kΩ resistors. Leave ESP32 GPIO disconnected.",
+      "Apply power and measure Vin and Vout. Note the effect of resistor tolerance.",
+      "Disconnect power, add the third 10 kΩ resistor as a load, and measure again.",
+      "Use the results to explain why a divider’s output falls under a heavy load."
+    ],
+    "evidence": "Two circuit diagrams and a table comparing unloaded and loaded calculations with measurements.",
+    "understand": [
+      "I can identify series and parallel connections by their nodes.",
+      "I can calculate divider voltage and loading effects.",
+      "I will not use a divider as a regulated power supply."
+    ],
+    "quiz": [
+      "What is the resistance of two 4.7 kΩ resistors in parallel?",
+      "How does adding a load affect a voltage divider?",
+      "Why is current the same throughout a series path?"
+    ],
+    "challenge": "Design a divider from 3.3 V to approximately 1.1 V, then recalculate with a finite load.",
+    "gear": "Three 10 kΩ resistors, a multimeter and a 3.3 V supply.",
+    "code": "",
+    "refs": [],
+    "fault": "If the result differs from your prediction, disconnect power and check the wiring, units and component specifications. Change one thing at a time, then repeat the measurement.",
+    "terms": [
+      [
+        "series",
+        "串聯"
+      ],
+      [
+        "parallel",
+        "並聯"
+      ],
+      [
+        "node",
+        "節點"
+      ],
+      [
+        "voltage divider",
+        "分壓器"
+      ]
+    ]
+  },
+  {
+    "title": "Measurements and schematics",
+    "goal": "Use a multimeter safely and turn a schematic into actual wiring.",
+    "concepts": [
+      [
+        "Wires represent nodes",
+        "Connected wires belong to the same electrical node. Crossing lines may or may not connect; check the junction symbol. Ground symbols normally identify a shared net. Separate power, load and control sections when reading a drawing."
+      ],
+      [
+        "Measure voltage in parallel",
+        "Use the COM and V/Ω sockets and select DC voltage. Measure between two points, using ground as the reference where appropriate. Slipping probes can short neighbouring pins; attach suitable test leads before powering narrow connectors."
+      ],
+      [
+        "Measure resistance with power removed",
+        "Disconnect the battery and USB before measuring resistance or continuity. Parallel paths on a board can change the reading. A continuity beep does not prove zero resistance; a charging capacitor may briefly cause a beep."
+      ],
+      [
+        "Measure current in series",
+        "Current mode has low resistance and must be inserted into the load path. Use the correct socket, range and fuse. Beginners can infer current from a resistor’s voltage drop; high motor-current measurements are not required. A multimeter may miss brief voltage dips."
+      ]
+    ],
+    "example": "If an LED does not light, check supply voltage, then disconnect power and inspect the breadboard connections, LED direction and resistor. Do not bypass the resistor to test it. A 1.2 V drop across 330 Ω implies about 3.64 mA.",
+    "diagram": "Voltage: meter across the load (parallel)\nCurrent: source → meter → load (series)\nResistance / continuity: all power disconnected",
+    "steps": [
+      "On an unpowered breadboard, identify connected rows and any breaks in the power rails.",
+      "Draw an LED schematic and build it from the drawing.",
+      "Check the probe sockets and mode. Measure 3V3 and the resistor and LED voltage drops.",
+      "With power off, disconnect one LED branch wire. Diagnose the open circuit systematically, then restore it.",
+      "Record the range and readings. Extra display digits do not automatically mean greater accuracy."
+    ],
+    "evidence": "Your schematic, wiring photograph and a record of diagnosing an open circuit.",
+    "understand": [
+      "I can distinguish voltage measurement in parallel from current measurement in series.",
+      "I know resistance and continuity measurements require power to be disconnected.",
+      "I can map schematic nodes to physical connections."
+    ],
+    "quiz": [
+      "What happens if a meter in current mode is placed across a supply?",
+      "Does a low in-circuit resistance reading prove a resistor is faulty?",
+      "Can a normal multimeter reading rule out a brief voltage dip?"
+    ],
+    "challenge": "Rebuild the same circuit elsewhere on the breadboard to demonstrate that you understand the nodes rather than a photograph.",
+    "gear": "A breadboard, multimeter and basic components; paper calculations are also useful.",
+    "code": "",
+    "refs": [],
+    "fault": "If the result differs from your prediction, disconnect power and check the wiring, units and component specifications. Change one thing at a time, then repeat the measurement.",
+    "terms": [
+      [
+        "schematic",
+        "原理圖"
+      ],
+      [
+        "continuity",
+        "導通"
+      ],
+      [
+        "open circuit",
+        "斷路"
+      ],
+      [
+        "measurement",
+        "量度"
+      ]
+    ]
+  },
+  {
+    "title": "Capacitors and inductors",
+    "goal": "Understand energy storage, RC behaviour, decoupling and current paths.",
+    "concepts": [
+      [
+        "Capacitors oppose sudden voltage changes",
+        "Capacitor current is I = C × dV/dt. An RC circuit does not instantly reach its final voltage. Its time constant is τ = RC; a simple first-order charging circuit reaches about 63% after one τ. Electrolytic capacitors have polarity and voltage ratings."
+      ],
+      [
+        "Decoupling and bulk capacitance",
+        "A capacitor close to a chip supplies short local demands. Bulk capacitance helps with larger temporary changes at the power input. Placement, current loops and component properties matter. A capacitor cannot fix a continuous power shortage."
+      ],
+      [
+        "Inductors oppose sudden current changes",
+        "V = L × dI/dt. Motors and relays contain coils. Suddenly interrupting their current can generate high voltage; stored energy needs an appropriate recirculation or absorption path. This is one reason not to connect motors directly to GPIO."
+      ],
+      [
+        "Two ways to store energy",
+        "Capacitors store energy in an electric field: E = ½CV². Inductors use a magnetic field: E = ½LI². Understand these relationships before studying filters and switching supplies in more depth."
+      ]
+    ],
+    "example": "10 kΩ and 100 µF give τ ≈ 1 second. Charging from 3.3 V reaches about 2.1 V after one second and nearly the final value after five seconds. A multimeter may show this slow change, but tolerance and display update rate affect the observations.",
+    "diagram": "3V3 ── 10 kΩ ──●── capacitor ── GND\n                └── measure voltage to GND",
+    "steps": [
+      "Verify the 100 µF capacitor’s polarity and a voltage rating above the supply voltage.",
+      "Build the circuit with power off. Discharge through a resistor and check that voltage is near zero.",
+      "Apply 3.3 V and record capacitor voltage at approximately 1, 2 and 5 seconds.",
+      "Disconnect power and discharge through 10 kΩ. Never use a metal short to discharge it.",
+      "Sketch charging and discharging curves. Explain why this slow RC circuit should not power an ESP32."
+    ],
+    "evidence": "A labelled RC circuit and a measured or predicted charging and discharging curve.",
+    "understand": [
+      "I can explain which changes capacitors and inductors oppose.",
+      "I can calculate an RC time constant.",
+      "I know decoupling cannot replace sufficient supply power."
+    ],
+    "quiz": [
+      "What happens to τ if resistance doubles?",
+      "Can a capacitor fix a supply that is continuously overloaded?",
+      "Why can switching a coil off generate high voltage?"
+    ],
+    "challenge": "Change R while keeping the supply unchanged and compare time constants. Without a capacitor, draw predicted curves first.",
+    "gear": "A 10 kΩ resistor, a 100 µF capacitor with a suitable voltage rating, and a multimeter.",
+    "code": "",
+    "refs": [],
+    "fault": "If the result differs from your prediction, disconnect power and check the wiring, units and component specifications. Change one thing at a time, then repeat the measurement.",
+    "terms": [
+      [
+        "capacitor",
+        "電容"
+      ],
+      [
+        "inductor",
+        "電感"
+      ],
+      [
+        "time constant",
+        "時間常數"
+      ],
+      [
+        "decoupling",
+        "去耦"
+      ]
+    ]
+  },
+  {
+    "title": "Diodes, transistors and MOSFETs",
+    "goal": "Understand electronic switches and separate the control side from the load side.",
+    "concepts": [
+      [
+        "A diode is not a perfect one-way valve",
+        "Diodes have a forward voltage drop, current and thermal limits, and a reverse-voltage rating. Choose a flyback diode for the load, switching speed and stored energy. Appearance alone does not make a signal diode interchangeable with a power diode."
+      ],
+      [
+        "BJT and MOSFET control",
+        "A BJT requires base current. A MOSFET’s conduction depends on gate-to-source voltage, and switching requires charging and discharging its gate. The gate is not a motor supply input. VGS(th) does not prove low-resistance operation at 3.3 V; check guaranteed RDS(on) at the relevant VGS."
+      ],
+      [
+        "An N-channel low-side switch",
+        "Source connects to ground, drain to the load’s negative terminal, and the load’s positive terminal to its supply. The controller shares ground. A gate pull-down can keep the switch off during reset. A series gate resistor affects switching; its value depends on the design."
+      ],
+      [
+        "Start with a small non-inductive load",
+        "Use an LED and resistor first. Inductive loads require appropriate energy paths. A diode arrangement for a one-direction coil switch cannot be copied blindly across a bidirectional H-bridge."
+      ]
+    ],
+    "example": "At 0.5 A, a MOSFET with RDS(on) = 0.1 Ω at the actual gate voltage dissipates I²R = 0.025 W. If incomplete turn-on gives 2 Ω instead, dissipation becomes 0.5 W: twenty times higher.",
+    "diagram": "Load supply + → LED + resistor → Drain\nGPIO → suitable gate circuit → Gate\nCommon GND ─────────────────→ Source",
+    "steps": [
+      "Choose a documented MOSFET or module suitable for a 3.3 V gate signal. Without one, work on paper first.",
+      "Identify D, G and S and the test conditions for RDS(on) in the datasheet.",
+      "Build a low-side switch for a small LED load with power disconnected. Do not attach a motor.",
+      "After Unit 09, use GPIO to switch it and observe its state during reset.",
+      "Draw the additional protection and current requirements for a coil load, without powering that version yet."
+    ],
+    "evidence": "A pin-labelled switch diagram, the relevant datasheet conditions and a reset-state observation.",
+    "understand": [
+      "I know the roles of gate, drain and source.",
+      "I do not treat VGS(th) as proof of full turn-on.",
+      "I can explain conduction loss and the purpose of a pull-down."
+    ],
+    "quiz": [
+      "Does VGS(th) = 2 V guarantee low resistance at a 3.3 V gate voltage?",
+      "Why add a gate pull-down?",
+      "Why does a coil need more analysis than an LED load?"
+    ],
+    "challenge": "Compare a MOSFET switch and a relay in terms of control, speed, loss and isolation. Neither is a universal solution.",
+    "gear": "A breadboard, multimeter and basic components; paper calculations are also useful.",
+    "code": "",
+    "refs": [],
+    "fault": "If the result differs from your prediction, disconnect power and check the wiring, units and component specifications. Change one thing at a time, then repeat the measurement.",
+    "terms": [
+      [
+        "gate",
+        "閘極"
+      ],
+      [
+        "drain",
+        "汲極"
+      ],
+      [
+        "source",
+        "源極"
+      ],
+      [
+        "flyback",
+        "續流／反向電壓處理"
+      ]
+    ]
+  },
+  {
+    "title": "Power supplies and regulators",
+    "goal": "Build a power budget and understand batteries, regulators and heat.",
+    "concepts": [
+      [
+        "Battery voltage changes",
+        "Check chemistry, series cell count, full-charge voltage and the permitted minimum voltage. Capacity in mAh describes charge, not maximum current capability. Wh ≈ nominal V × Ah is more useful for comparing stored energy."
+      ],
+      [
+        "LDO and buck regulators",
+        "An LDO dissipates the voltage difference as heat: approximately P = (Vin − Vout)I. A buck converter switches energy through storage components to reduce voltage. Its efficiency depends on conditions, and it cannot maintain a higher output from an arbitrarily low input."
+      ],
+      [
+        "Add power across different voltage rails",
+        "Only currents referred to the same supply node can be added directly. A 5 V, 2 A load needs 10 W. At 7.4 V and an assumed 90% efficiency, it draws approximately 1.50 A from the battery, before other loads and transients."
+      ],
+      [
+        "USB and external power",
+        "Do not connect USB and an external 5 V source simultaneously on an undocumented board; backfeeding may occur. Check the power path first. Your exact power expansion board is unconfirmed, so a “Pi power” label does not establish a continuous 5 A rating."
+      ]
+    ],
+    "example": "An LDO converting 12 V to 3.3 V at 0.2 A dissipates 1.74 W. With an assumed 90%-efficient buck, the same 0.66 W output needs about 0.733 W input and loses about 0.073 W. These are calculations, not guarantees for an arbitrary module.",
+    "diagram": "Battery → motor branch\n        → buck regulator → logic / Pi branch\nRefer each branch’s power back to the battery.",
+    "steps": [
+      "List each rail’s voltage and average and peak current, including the source of each number.",
+      "Calculate output power, then estimate battery-side demand using stated efficiency assumptions.",
+      "Check input range, continuous capability, cooling conditions and the USB power path.",
+      "On a verified supply, measure idle and small-load voltages. Do not perform a stall test.",
+      "Label every number as measured, specified or assumed rather than treating all as equally certain."
+    ],
+    "evidence": "A power budget with sources, assumptions, voltage ranges and thermal estimates.",
+    "understand": [
+      "I can estimate ideal runtime using Wh and W and explain the limitations.",
+      "I can compare LDO and buck regulator heat.",
+      "I know nominal and full-charge voltages differ."
+    ],
+    "quiz": [
+      "Why is mAh alone insufficient to compare two different-voltage batteries?",
+      "What heat does an LDO produce from 12 V to 3.3 V at 0.2 A?",
+      "Why should branch currents at different voltages not simply be added?"
+    ],
+    "challenge": "Add the Pi to the budget using actual load information. List startup demand separately.",
+    "gear": "A breadboard, multimeter and basic components; paper calculations are also useful.",
+    "code": "",
+    "refs": [
+      "pi"
+    ],
+    "fault": "If the result differs from your prediction, disconnect power and check the wiring, units and component specifications. Change one thing at a time, then repeat the measurement.",
+    "terms": [
+      [
+        "regulator",
+        "穩壓器"
+      ],
+      [
+        "efficiency",
+        "效率"
+      ],
+      [
+        "backfeeding",
+        "回灌"
+      ],
+      [
+        "power budget",
+        "功率預算"
+      ]
+    ]
+  },
+  {
+    "title": "Datasheets and logic-level compatibility",
+    "goal": "Decide whether devices can connect directly or need an interface.",
+    "concepts": [
+      [
+        "Start with recommended operating conditions",
+        "Absolute maximum ratings are limits, not normal operating targets. Check pinout, power, logic thresholds, output type, reference circuits and layout requirements. A product title is not a datasheet."
+      ],
+      [
+        "Logic levels are voltage ranges",
+        "A HIGH output is not always exactly the supply voltage. Compare sender VOH/VOL with receiver VIH/VIL, and stay inside input voltage limits. A 3.3 V controller cannot automatically drive every 5 V device."
+      ],
+      [
+        "Push-pull and open-drain outputs",
+        "Push-pull actively drives high and low. Open-drain drives low and relies on a pull-up for high. I²C commonly uses open-drain; UART is usually push-pull. An arbitrary bidirectional level-shifter module is not suitable for every fast interface."
+      ],
+      [
+        "Write a wiring contract",
+        "For each connection, record direction, voltage, default state, interface and pin. Matching connector pin counts do not imply matching protocols. ESP32-C3 boot-strapping and USB pins also need special consideration."
+      ]
+    ],
+    "example": "A sensor powered from 5 V with a 5 V push-pull output must not connect directly to an ESP32 input. An open-drain output might use a 3.3 V pull-up only if the device permits it and the board does not already pull the line to 5 V. Verify the circuit.",
+    "diagram": "Sender output range → receiver thresholds\nAlso check: input maximum, ground, direction and default state.",
+    "steps": [
+      "Find official documentation or a reliable schematic for a module you plan to use.",
+      "List VCC, GND, signal pins and output types.",
+      "Compare the controller’s input limits and logic thresholds with the module’s specifications.",
+      "Inspect on-board pull-ups and boot-related pins. Do not label unknowns as compatible.",
+      "Draw one direct connection and one connection requiring conversion. Explain each decision."
+    ],
+    "evidence": "A compatibility table and two annotated connection diagrams.",
+    "understand": [
+      "I can distinguish absolute limits from operating ranges.",
+      "I can distinguish open-drain from push-pull.",
+      "I can support compatibility with specifications rather than wire colours."
+    ],
+    "quiz": [
+      "Why are absolute maximum ratings not operating targets?",
+      "Can every 3.3 V output control every 5 V input?",
+      "What must be checked before pulling an open-drain line to 3.3 V?"
+    ],
+    "challenge": "Find the UART or I²C logic levels of your actual motor board rather than guessing.",
+    "gear": "A breadboard, multimeter and basic components; paper calculations are also useful.",
+    "code": "",
+    "refs": [
+      "c3",
+      "c3hw"
+    ],
+    "fault": "If the result differs from your prediction, disconnect power and check the wiring, units and component specifications. Change one thing at a time, then repeat the measurement.",
+    "terms": [
+      [
+        "datasheet",
+        "規格書"
+      ],
+      [
+        "threshold",
+        "門檻"
+      ],
+      [
+        "push-pull",
+        "推挽"
+      ],
+      [
+        "open-drain",
+        "開漏"
+      ]
+    ]
+  },
+  {
+    "title": "Your board and development environment",
+    "goal": "Upload a program, read serial output and distinguish build and upload problems.",
+    "concepts": [
+      [
+        "A C3 SuperMini is a suitable starting point",
+        "It can handle most individual experiments here. “SuperMini” does not identify one fixed board design; save its pinout and a photo. GPIO numbers are not physical header positions. Use Unit 26 to choose another controller when you need more resources."
+      ],
+      [
+        "Installation and versions",
+        "Install Espressif’s esp32 package through Boards Manager in Arduino IDE 2.x and record the version. The LEDC servo example uses Arduino-ESP32 3.x. Older tutorials may use different APIs."
+      ],
+      [
+        "Board selection and USB",
+        "Follow the vendor’s board instructions. If no specific option exists, documentation may direct you to ESP32C3 Dev Module; verify flash and native USB CDC settings. The USB cable must support data. Port names may change after reconnecting."
+      ],
+      [
+        "Separate three types of failure",
+        "For compilation errors, read the first meaningful error. For upload failures, check the cable, board, port and download mode. For successful uploads with no output, check USB CDC, the serial port and program. Change one setting at a time."
+      ]
+    ],
+    "example": "Upload a program that only prints HELLO before attaching any external load. Once the counter works, add an LED. This keeps USB problems separate from wiring problems.",
+    "diagram": "IDE → compile → upload → ESP32\nESP32 → USB serial → Serial Monitor",
+    "steps": [
+      "Install the IDE and esp32 package. Record the version and board options.",
+      "Connect only USB, paste the example and select Verify.",
+      "Choose the correct port, upload and open Serial Monitor at 115200.",
+      "If necessary, enter download mode using the board’s instructions. A common sequence is holding BOOT, pressing and releasing RESET, then releasing BOOT.",
+      "Restart the board and check that the count starts again. Save the working minimal program."
+    ],
+    "evidence": "The board settings, package version, working sketch and serial output.",
+    "understand": [
+      "I know GPIO numbers differ from physical pin positions.",
+      "I can distinguish compilation, upload and runtime problems.",
+      "I can find and save the correct settings for my board."
+    ],
+    "quiz": [
+      "Why might a charging-only USB cable fail here?",
+      "How is a compilation error different from an upload error?",
+      "What should you check when upload works but Serial Monitor stays empty?"
+    ],
+    "challenge": "Add a boot message such as firmware v0.1 and confirm that the updated program is actually running.",
+    "gear": "An ESP32-C3 SuperMini, a data-capable USB cable and a computer.",
+    "code": "unsigned long lastPrint = 0;\nunsigned long count = 0;\nvoid setup() { Serial.begin(115200); }\nvoid loop() {\n  unsigned long now = millis();\n  if (now - lastPrint >= 1000) {\n    lastPrint = now;\n    Serial.print(\"HELLO \"); Serial.println(count++);\n  }\n}\n",
+    "refs": [
+      "install"
+    ],
+    "fault": "If serial output is missing, check USB CDC and the actual port before replacing the cable. The download and runtime ports may differ. Keep the correct board type; do not randomly change flash settings.",
+    "terms": [
+      [
+        "compile",
+        "編譯"
+      ],
+      [
+        "upload",
+        "上傳"
+      ],
+      [
+        "firmware",
+        "韌體"
+      ],
+      [
+        "serial port",
+        "串列埠"
+      ]
+    ]
+  },
+  {
+    "title": "Essential programming concepts",
+    "goal": "Read, trace and modify a small control program.",
+    "concepts": [
+      [
+        "Values have types",
+        "bool represents true or false, int integers, and float fractional values. Bit width, signedness and range matter. Integer 5 / 2 produces 2; floating-point arithmetic can produce 2.5. Name variables clearly, including units such as degrees, milliseconds or rpm."
+      ],
+      [
+        "Conditions and comparisons",
+        "if decides whether code runs. == compares; = assigns. Validate external commands against verified limits rather than executing every received value."
+      ],
+      [
+        "Functions and arrays",
+        "Functions give reusable operations clear names. Arrays can store information for several wheels. Indexing starts at zero: an array of length four has valid indices 0–3, not a fifth motor at index 4."
+      ],
+      [
+        "setup and loop",
+        "setup runs once at startup; loop repeats. A local variable may be reinitialised whenever execution enters its scope. Persistent state needs the right lifetime. Trace the program on paper instead of treating AI-generated code as a black box."
+      ]
+    ],
+    "example": "Clamp a command between −100 and 100 before passing it to a driver interface. This numerical example does not define real motor units and does not output PWM.",
+    "diagram": "Input value → range check / clamp → accepted command\n−150 → −100     180 → 100",
+    "steps": [
+      "Predict the output for all four example inputs on paper.",
+      "Upload the example and compare Serial Monitor results. Do not connect a motor.",
+      "Test −100, 100 and values outside the range.",
+      "Write your own named function and document the units it accepts.",
+      "Explain why the array loop uses i < 4 rather than i <= 4."
+    ],
+    "evidence": "A traced example and a table of boundary and out-of-range tests.",
+    "understand": [
+      "I can explain integer versus floating-point arithmetic.",
+      "I can trace conditions, functions and loops.",
+      "I can avoid array bounds errors and limit input ranges."
+    ],
+    "quiz": [
+      "What is the result of integer 5 / 2?",
+      "Which indices are valid for an array of length four?",
+      "Why must a command be checked before it reaches a driver?"
+    ],
+    "challenge": "Write a function converting 0–100 percent to 0–255 and test 0, 50 and 100.",
+    "gear": "An ESP32 and Serial Monitor; start with a paper trace.",
+    "code": "int limitCommand(int value) {\n  if (value > 100) return 100;\n  if (value < -100) return -100;\n  return value;\n}\nvoid setup() {\n  Serial.begin(115200);\n}\nvoid loop() {\n  int values[4] = {-150, -20, 50, 180};\n  for (int i=0; i<4; i++) {\n    Serial.print(values[i]); Serial.print(\" -> \");\n    Serial.println(limitCommand(values[i]));\n  }\n  delay(2000); // Standalone output demo only; use non-blocking timing when integrating.\n}\n",
+    "refs": [],
+    "fault": "If the result differs from your prediction, disconnect power and check the wiring, units and component specifications. Change one thing at a time, then repeat the measurement.",
+    "terms": [
+      [
+        "variable",
+        "變數"
+      ],
+      [
+        "array",
+        "陣列"
+      ],
+      [
+        "boundary",
+        "邊界"
+      ],
+      [
+        "assignment",
+        "賦值"
+      ]
+    ]
+  },
+  {
+    "title": "Digital inputs and outputs",
+    "goal": "Build a button input with a defined idle state and reliable press counting.",
+    "concepts": [
+      [
+        "Inputs and outputs have different jobs",
+        "OUTPUT drives a logic level; INPUT reads one. Neither implies unlimited current. Each external LED needs its own resistor. GPIO3/10 for LEDs and GPIO4/5 for buttons are examples to verify against your board and other pin assignments."
+      ],
+      [
+        "Pull-ups define the idle state",
+        "With INPUT_PULLUP, an unpressed button reads HIGH and a button connected to ground reads LOW. A four-leg button contains two internally connected pairs; identify them with power removed. Avoid externally disturbing C3 strapping pins GPIO2, 8 and 9 during startup."
+      ],
+      [
+        "Count edges, not every LOW reading",
+        "Mechanical contacts bounce. Accept a reading only after it stays stable for a defined interval. Count a stable HIGH-to-LOW transition; otherwise holding a button would increment the count on every loop."
+      ],
+      [
+        "Debouncing is a timing decision",
+        "The example starts with 30 ms: update the timestamp whenever the raw input changes, and accept a new stable state only after 30 ms. This is an experimental starting point, not a universal switch specification."
+      ]
+    ],
+    "example": "Each press toggles its LED and increments a count. Twenty separate presses should produce twenty events. Holding the button for two seconds should produce only one. This is stronger evidence than merely observing an LED light.",
+    "diagram": "GPIO3 / GPIO10 → separate 330 Ω resistors → LEDs → GND\nGPIO4 / GPIO5 → separate buttons → GND\nINPUT_PULLUP: released HIGH, pressed LOW",
+    "steps": [
+      "Verify the pins and wire two LEDs and two buttons with power disconnected.",
+      "Check each path separately, then upload the example.",
+      "At 115200 baud, press each button twenty times and record its count.",
+      "Test long presses and simultaneous presses. Counts should not keep increasing while held.",
+      "Restart the board and check that LEDs begin off and counters reset."
+    ],
+    "evidence": "Wiring, a twenty-press count test, long-press results and reset behaviour.",
+    "understand": [
+      "I can explain INPUT_PULLUP and why LOW means pressed.",
+      "I can distinguish raw state, stable state and edges.",
+      "I know boot-strapping pins need different consideration from ordinary GPIO."
+    ],
+    "quiz": [
+      "Why does INPUT_PULLUP read LOW when a button to ground is pressed?",
+      "Why should a long press not count repeatedly?",
+      "How would you test whether 30 ms is suitable?"
+    ],
+    "challenge": "Add a one-second hold to clear the counter while keeping short-press toggling. Draw the states before coding.",
+    "gear": "An ESP32, two LEDs, two 330 Ω resistors and two buttons.",
+    "code": "const int LED_PINS[2] = {3, 10};\nconst int BUTTON_PINS[2] = {4, 5};\nbool lastRaw[2] = {HIGH, HIGH};\nbool stable[2] = {HIGH, HIGH};\nbool ledState[2] = {false, false};\nunsigned long changedAt[2] = {0, 0};\nunsigned long count[2] = {0, 0};\nvoid setup() {\n  Serial.begin(115200);\n  for (int i=0; i<2; i++) {\n    pinMode(LED_PINS[i], OUTPUT);\n    digitalWrite(LED_PINS[i], LOW);\n    pinMode(BUTTON_PINS[i], INPUT_PULLUP);\n  }\n}\nvoid loop() {\n  unsigned long now = millis();\n  for (int i=0; i<2; i++) {\n    bool raw = digitalRead(BUTTON_PINS[i]);\n    if (raw != lastRaw[i]) {\n      lastRaw[i] = raw; changedAt[i] = now;\n    }\n    if (now - changedAt[i] >= 30 && raw != stable[i]) {\n      stable[i] = raw;\n      if (stable[i] == LOW) {\n        count[i]++;\n        ledState[i] = !ledState[i];\n        digitalWrite(LED_PINS[i], ledState[i] ? HIGH : LOW);\n        Serial.print(\"BUTTON \"); Serial.print(i+1);\n        Serial.print(\" COUNT \"); Serial.println(count[i]);\n      }\n    }\n  }\n}\n",
+    "refs": [
+      "c3hw"
+    ],
+    "fault": "If the result differs from your prediction, disconnect power and check the wiring, units and component specifications. Change one thing at a time, then repeat the measurement.",
+    "terms": [
+      [
+        "pull-up",
+        "上拉"
+      ],
+      [
+        "debounce",
+        "去彈跳"
+      ],
+      [
+        "edge",
+        "邊沿"
+      ],
+      [
+        "floating input",
+        "浮接輸入"
+      ]
+    ]
+  },
+  {
+    "title": "Analog input, PWM and timing",
+    "goal": "Read a knob to control brightness while keeping a button responsive.",
+    "concepts": [
+      [
+        "ADC converts voltage to numbers",
+        "Resolution is the number of distinguishable codes, not absolute accuracy. ESP32 ADC ranges depend on the chip and attenuation setting. A 3.3 V logic supply does not imply accurate measurement across 0–3.3 V. analogReadMilliVolts gives a calibrated estimate that still needs comparison with measurements."
+      ],
+      [
+        "PWM switches rapidly",
+        "Frequency f and period T are reciprocals. Duty cycle is HIGH time divided by T. A 50% duty cycle is not a steady 1.65 V and does not guarantee half motor speed. This example uses analogWrite with its default 0–255 scale for an LED."
+      ],
+      [
+        "Limit the analog input range",
+        "Connect 3V3 through a fixed 10 kΩ resistor to the high end of a 10 kΩ potentiometer, its low end to ground and its wiper to GPIO0. Maximum output is approximately 1.65 V. Measure it first and confirm GPIO0 is an available ADC input on your board."
+      ],
+      [
+        "Schedule work independently",
+        "Update control every 10 ms and report every 500 ms instead of blocking everything with a long delay. Investigate clipping, noise and mapping errors separately."
+      ]
+    ],
+    "example": "At 1 kHz, the PWM period is 1 ms. At 25% duty cycle, HIGH lasts 0.25 ms. A 12-bit ADC has 4096 codes, but attenuation, calibration and noise still affect voltage accuracy.",
+    "diagram": "3V3 ── 10 kΩ ── potentiometer high end\n                  wiper → GPIO0 (measure first)\n                  low end → GND\nGPIO3 → 330 Ω → LED → GND; GPIO4 → button → GND",
+    "steps": [
+      "Wire the divider with power off and GPIO0 disconnected. Apply power and verify the maximum output is about 1.65 V.",
+      "Disconnect power, then connect the verified output to the ADC and wire the LED and button.",
+      "Upload the example and turn the knob while observing millivolts and brightness.",
+      "Hold the button to turn the LED off, then release it. Check for noticeable response delay.",
+      "Compare ADC millivolts with a multimeter at three knob positions. Record error and fluctuation."
+    ],
+    "evidence": "A three-point ADC/multimeter comparison, PWM timing sketch and button response test.",
+    "understand": [
+      "I can distinguish ADC resolution from accuracy.",
+      "I can calculate PWM period and HIGH time.",
+      "I can schedule different update rates without long delays."
+    ],
+    "quiz": [
+      "What is HIGH time at 2 kHz and 25% duty?",
+      "Why does ADC code 4095 not necessarily mean 3.3 V?",
+      "How can printing large amounts of text on every loop affect control?"
+    ],
+    "challenge": "Add simple averaging and compare steadiness with response delay. Keep the raw readings for comparison.",
+    "gear": "A 10 kΩ potentiometer, 10 kΩ resistor, LED, 330 Ω resistor, button and ESP32.",
+    "code": "const int ADC_PIN=0, LED_PIN=3, BUTTON_PIN=4;\nunsigned long lastControl=0, lastReport=0;\nuint32_t mv=0;\nvoid setup() {\n  Serial.begin(115200);\n  pinMode(LED_PIN,OUTPUT);\n  pinMode(BUTTON_PIN,INPUT_PULLUP);\n  analogReadResolution(12);\n  analogSetPinAttenuation(ADC_PIN, ADC_11db);\n}\nvoid loop() {\n  unsigned long now=millis();\n  if (now-lastControl>=10) {\n    lastControl=now;\n    mv=analogReadMilliVolts(ADC_PIN);\n    int duty=constrain((int)(mv*255UL/1650UL),0,255);\n    analogWrite(LED_PIN,digitalRead(BUTTON_PIN)==LOW ? 0 : duty);\n  }\n  if (now-lastReport>=500) {\n    lastReport=now; Serial.println(mv);\n  }\n}\n",
+    "refs": [
+      "adc",
+      "pwm"
+    ],
+    "fault": "If the result differs from your prediction, disconnect power and check the wiring, units and component specifications. Change one thing at a time, then repeat the measurement.",
+    "terms": [
+      [
+        "duty cycle",
+        "佔空比"
+      ],
+      [
+        "resolution",
+        "解析度"
+      ],
+      [
+        "attenuation",
+        "衰減"
+      ],
+      [
+        "sampling",
+        "取樣"
+      ]
+    ]
+  },
+  {
+    "title": "Sensors and data quality",
+    "goal": "Decide whether measurements are trustworthy and apply simple calibration and filtering.",
+    "concepts": [
+      [
+        "Sensors measure particular quantities",
+        "Light, temperature, distance and inertial sensors measure different physical quantities. Range, resolution, accuracy, update rate and latency are distinct specifications. An accelerometer’s reading includes gravity; it is not simply vehicle speed."
+      ],
+      [
+        "Separate bias from noise",
+        "A fixed offset is bias; random fluctuation is one form of noise; a slowly changing error is drift. Averaging can reduce some random noise but cannot automatically correct scale errors or clipping."
+      ],
+      [
+        "Two-point calibration",
+        "If raw reading r and actual value x are approximately linear, two known points give x = a r + b. Use the relationship only over a justified range. Two points cannot correct every nonlinearity, and the reference instrument also has error."
+      ],
+      [
+        "Filtering has a cost",
+        "An N-point moving average smooths data but adds delay. Exponential averaging uses y = αx + (1 − α)y_previous. Smaller α gives a steadier but slower response. Detect outliers, disconnections and invalid codes instead of averaging them as valid measurements."
+      ]
+    ],
+    "example": "If actual values 0 and 100 produce readings 10 and 110, x = r − 10. If actual 100 instead produces 210, use a = 100 / (210 − 10) = 0.5 and b = −5.",
+    "diagram": "Raw data → validity check → units / calibration → filter → control\n    └──────────────────→ keep raw data for debugging",
+    "steps": [
+      "Use the previous knob or a documented sensor. Hold conditions steady and record twenty raw readings.",
+      "Calculate the mean, maximum and minimum to describe the fluctuation.",
+      "Compare two known inputs. Without a trustworthy reference, do not claim calibration.",
+      "Apply exponential averaging with α = 0.2 and observe a sudden input change.",
+      "Mark invalid data explicitly. A disconnected sensor must not become a normal zero reading in control logic."
+    ],
+    "evidence": "A raw/filtered data table, a two-point calibration calculation and an observation of delay.",
+    "understand": [
+      "I can distinguish resolution, accuracy and update rate.",
+      "I know averaging does not fix a constant bias.",
+      "I can explain the trade-off between smoothness and delay."
+    ],
+    "quiz": [
+      "Can averaging fix a thermometer that always reads 2°C too high?",
+      "What happens when α becomes smaller?",
+      "Why should a disconnection not become a valid 0°C measurement?"
+    ],
+    "challenge": "Choose a stale-data timeout for distance-based obstacle avoidance. Explain how speed and stopping distance affect it.",
+    "gear": "A breadboard, multimeter and basic components; paper calculations are also useful.",
+    "code": "",
+    "refs": [],
+    "fault": "If the result differs from your prediction, disconnect power and check the wiring, units and component specifications. Change one thing at a time, then repeat the measurement.",
+    "terms": [
+      [
+        "bias",
+        "偏差"
+      ],
+      [
+        "noise",
+        "雜訊"
+      ],
+      [
+        "calibration",
+        "校準"
+      ],
+      [
+        "latency",
+        "延遲"
+      ]
+    ]
+  },
+  {
+    "title": "UART and USB serial",
+    "goal": "Create clear commands and replies between a Pi or computer and an ESP32.",
+    "concepts": [
+      [
+        "UART and USB are different",
+        "UART uses TX/RX signals with matching baud rate, format and logic levels. USB has different electrical and protocol layers. A USB serial interface lets software work with a serial-like port; USB D+/D− are not UART TX/RX."
+      ],
+      [
+        "Bare UART wiring",
+        "Connect TX to the other device’s RX, RX to TX, and share ground after confirming compatible logic levels. Do not join two TX outputs. TTL UART is electrically different from RS-232 and RS-485 despite all being serial interfaces."
+      ],
+      [
+        "Protocols need boundaries and error handling",
+        "Here, ON, OFF and STATUS end with LF; CR is ignored, so CRLF also works. Unknown commands return an error and overlong lines are discarded. A fixed buffer prevents unlimited accumulation. Define command units and permitted ranges."
+      ],
+      [
+        "Timeout is a system behaviour",
+        "The example turns an LED off after one second without a new ON. STATUS does not refresh this timer. This is not a motor emergency stop. If a Pi crashes, it cannot reliably send OFF; loss-of-command handling belongs at the execution end."
+      ]
+    ],
+    "example": "Send ON plus a newline: the board replies OK ON and lights the LED. Stop refreshing ON and it goes off after about one second. Repeated STATUS commands only report the button and do not keep the LED on.",
+    "diagram": "Pi / computer ── USB ── ESP32 → LED\nHost: ON       Device: OK ON\nHost: STATUS   Device: BUTTON=0 or 1",
+    "steps": [
+      "Use USB power only and verify the GPIO3 LED and GPIO4 button wiring.",
+      "Upload the example. Set Serial Monitor to 115200 and a newline ending.",
+      "Test ON, OFF, STATUS, an unknown command and an overlong line.",
+      "Try the same commands from a Pi serial terminal, or use your computer first. Only one application should open the port at a time.",
+      "Disconnect communication or stop repeating ON and record the LED response. Keep this test away from mechanisms that could move unexpectedly."
+    ],
+    "evidence": "A protocol table with normal, unknown, overlong and timeout test results.",
+    "understand": [
+      "I can distinguish USB, TTL UART and other serial electrical interfaces.",
+      "I can explain line endings and length limits.",
+      "I know which command resets the timeout."
+    ],
+    "quiz": [
+      "Which pin should TX connect to on the other device?",
+      "What can happen if two applications open the same serial port?",
+      "Will repeated STATUS commands keep this example’s LED on?"
+    ],
+    "challenge": "Add a read-only VERSION command without changing other commands or timeout behaviour.",
+    "gear": "An ESP32, USB cable, external LED and button; a Pi is optional.",
+    "code": "#include <string.h>\nconst int LED_PIN=3, BUTTON_PIN=4;\nchar buffer[32]; size_t used=0;\nbool dropping=false, active=false;\nunsigned long lastOn=0;\nvoid command(const char* s) {\n  if (!strcmp(s,\"ON\")) {\n    active=true; lastOn=millis(); Serial.println(\"OK ON\");\n  } else if (!strcmp(s,\"OFF\")) {\n    active=false; Serial.println(\"OK OFF\");\n  } else if (!strcmp(s,\"STATUS\")) {\n    Serial.print(\"BUTTON=\");\n    Serial.println(digitalRead(BUTTON_PIN)==LOW ? 1 : 0);\n  } else { Serial.println(\"ERR COMMAND\"); }\n}\nvoid setup() {\n  pinMode(LED_PIN,OUTPUT); digitalWrite(LED_PIN,LOW);\n  pinMode(BUTTON_PIN,INPUT_PULLUP); Serial.begin(115200);\n}\nvoid loop() {\n  while (Serial.available()) {\n    char c=Serial.read();\n    if (c=='\\r') continue;\n    if (c=='\\n') {\n      if (dropping) Serial.println(\"ERR TOO_LONG\");\n      else { buffer[used]='\\0'; command(buffer); }\n      used=0; dropping=false;\n    } else if (!dropping) {\n      if (used < sizeof(buffer)-1) buffer[used++]=c;\n      else { dropping=true; used=0; }\n    }\n  }\n  if (active && millis()-lastOn>=1000) active=false;\n  digitalWrite(LED_PIN,active ? HIGH : LOW);\n}\n",
+    "refs": [
+      "install"
+    ],
+    "fault": "If the result differs from your prediction, disconnect power and check the wiring, units and component specifications. Change one thing at a time, then repeat the measurement.",
+    "terms": [
+      [
+        "baud rate",
+        "鮑率"
+      ],
+      [
+        "buffer",
+        "緩衝區"
+      ],
+      [
+        "timeout",
+        "逾時"
+      ],
+      [
+        "protocol",
+        "通訊協議"
+      ]
+    ]
+  },
+  {
+    "title": "I²C and SPI",
+    "goal": "Understand two peripheral interfaces and connect sensors from their documentation.",
+    "concepts": [
+      [
+        "I²C selects devices by address",
+        "SDA carries data and SCL carries clock. Devices need ground and suitable pull-ups. Two devices with the same address may require an address change or multiplexer. Finding an address does not prove the data format is correct."
+      ],
+      [
+        "Pull-ups and wiring length",
+        "Modules may already contain pull-ups; several in parallel reduce resistance. Weak pull-ups can cause slow rising edges, while strong ones increase LOW-state current. Check voltage, use short wires and start at a documented conservative speed such as 100 kHz."
+      ],
+      [
+        "SPI uses chip select",
+        "Typical signals are SCLK, MOSI, MISO and a separate CS for each device. Clock polarity, phase, bit order and speed must match. Devices can share some lines only if unselected outputs do not interfere with the bus."
+      ],
+      [
+        "Choose an interface for its use",
+        "I²C uses fewer wires and suits multiple sensors. SPI is common for higher data rates but needs more wiring and chip selects. Neither is a universal solution for long robot wiring runs."
+      ]
+    ],
+    "example": "Two modules each carrying 4.7 kΩ pull-ups produce an equivalent 2.35 kΩ. “Supports I²C” is not enough: high-level voltage, addresses and bus loading must also be compatible.",
+    "diagram": "I²C SDA ─┬→ device A SDA\n         └→ device B SDA\n    SCL ─┬→ device A SCL\n         └→ device B SCL\nSeparate pull-ups; common GND. Do not join SDA to SCL.\nSPI: shared SCLK/MOSI/MISO where suitable; separate CS_A and CS_B.",
+    "steps": [
+      "Check the module’s supply and interface pinout. Verify GPIO6/7 are available before using the example.",
+      "With power off, connect a compatible I²C module. Verify pull-ups go to 3.3 V; not every module can run from a 3.3 V supply.",
+      "Scan for an address, then use the module’s official minimal example to read actual data.",
+      "Disconnect power before removing the module and repeat the scan. Do not short signal lines while operating.",
+      "Draw wiring for an SPI sensor, including CS and its required mode. Label this as a paper exercise if no hardware was tested."
+    ],
+    "evidence": "An interface wiring table, I²C scan and data results, plus an SPI wiring exercise.",
+    "understand": [
+      "I know the difference between I²C addresses and SPI chip selects.",
+      "I can verify pull-up voltage and parallel resistance.",
+      "I do not treat a successful scan as proof of correct sensor operation."
+    ],
+    "quiz": [
+      "How can an I²C address collision be resolved?",
+      "How do two parallel pull-ups change resistance?",
+      "What might happen if SPI modes do not match?"
+    ],
+    "challenge": "Write a compatibility checklist for a second module without needing to buy it.",
+    "gear": "An ESP32 and an optional, verified 3.3 V-compatible I²C module.",
+    "code": "#include <Wire.h>\nvoid setup() {\n  Serial.begin(115200);\n  Wire.begin(6,7); // SDA, SCL: verify the actual board first.\n  Wire.setClock(100000);\n}\nvoid loop() {\n  for (int address=1; address<127; address++) {\n    Wire.beginTransmission(address);\n    if (Wire.endTransmission()==0) {\n      Serial.print(\"Found 0x\"); Serial.println(address,HEX);\n    }\n  }\n  delay(2000); // Standalone scanner, not an integrated control loop.\n}\n",
+    "refs": [
+      "wire"
+    ],
+    "fault": "If the result differs from your prediction, disconnect power and check the wiring, units and component specifications. Change one thing at a time, then repeat the measurement.",
+    "terms": [
+      [
+        "bus",
+        "匯流排"
+      ],
+      [
+        "address",
+        "位址"
+      ],
+      [
+        "chip select",
+        "片選"
+      ],
+      [
+        "clock",
+        "時脈"
+      ]
+    ]
+  },
+  {
+    "title": "Reliable program structure",
+    "goal": "Keep input, communication, control and fault handling working together.",
+    "concepts": [
+      [
+        "States make behaviour explicit",
+        "Start with IDLE, RUN and FAULT. Each allows particular events. A normal speed command should not automatically restart a system in FAULT. Write the conditions for entering and leaving every state."
+      ],
+      [
+        "Cooperative scheduling",
+        "Keep each loop task short and use millis to decide what is due. Communication, sensing and control can have separate periods without a multitasking system. A sensor read function may itself block; check its timeout."
+      ],
+      [
+        "Interrupts and shared data",
+        "Interrupts can capture short events, but handlers should be brief, without long delays or heavy printing. Shared data needs suitable synchronisation. volatile alone does not guarantee atomicity or thread safety. Understand polling before adding interrupt complexity."
+      ],
+      [
+        "Define fault behaviour",
+        "Stale sensor data, lost communication, low voltage and resets need explicit responses. Stopping a command, disabling a driver and losing holding torque have different mechanical consequences. A software watchdog is not a complete safety solution."
+      ]
+    ],
+    "example": "With an LED model: START moves IDLE to RUN; a timeout moves RUN to FAULT and turns the LED off. FAULT can return to IDLE only after its cause is removed and an explicit RESET is received, never directly to RUN.",
+    "diagram": "IDLE ── START + valid conditions → RUN\nRUN ── timeout / error → FAULT (safe output state)\nFAULT ── cause removed + RESET → IDLE",
+    "steps": [
+      "Replace the motor with an LED and draw a state transition table.",
+      "Turn Unit 14 commands into events and schedule sensing and control separately.",
+      "Test valid, invalid and repeated commands in every state.",
+      "Simulate stale data. Verify that a normal START does not clear FAULT.",
+      "Record the slowest response. Compare heavy printing with a reduced reporting rate."
+    ],
+    "evidence": "A state table, normal and fault tests, and response-time measurements.",
+    "understand": [
+      "I can draw states and transition conditions.",
+      "I can prevent long blocking operations from disrupting control.",
+      "I can explain why automatic restart needs careful design."
+    ],
+    "quiz": [
+      "Should a speed command immediately move a system in FAULT?",
+      "Does volatile make every shared-data operation safe?",
+      "Which tasks suffer if a sensor function blocks?"
+    ],
+    "challenge": "Define output states for different faults on your car. Distinguish communication timeout from a hardware stopping function.",
+    "gear": "A breadboard, multimeter and basic components; paper calculations are also useful.",
+    "code": "",
+    "refs": [],
+    "fault": "If the result differs from your prediction, disconnect power and check the wiring, units and component specifications. Change one thing at a time, then repeat the measurement.",
+    "terms": [
+      [
+        "state machine",
+        "狀態機"
+      ],
+      [
+        "interrupt",
+        "中斷"
+      ],
+      [
+        "blocking",
+        "阻塞"
+      ],
+      [
+        "synchronisation",
+        "同步"
+      ]
+    ]
+  },
+  {
+    "title": "Actuator selection and mechanical requirements",
+    "goal": "Work backwards from the motion to the required speed, torque and driver.",
+    "concepts": [
+      [
+        "Describe the task first",
+        "Ask whether you need continuous rotation or positioning, how much load, what arm length or wheel diameter, what speed and for how long. Replace “powerful” with force, torque, speed and duty-cycle requirements."
+      ],
+      [
+        "Torque and speed",
+        "For a perpendicular force, τ = F × r. Mechanical power is P = τ × ω. A gearbox reduces speed and increases output torque but introduces loss, backlash and load limits. A larger wheel gives less ground force at the same shaft torque."
+      ],
+      [
+        "Acceleration and holding matter",
+        "Inertia, friction, slopes and acceleration increase torque demand. Enough static torque does not prove enough high-speed torque. Stall torque is not a continuous operating rating; thermal performance and duty cycle need checking."
+      ],
+      [
+        "Different actuators suit different jobs",
+        "Brushed DC motors with H-bridges suit wheels; positioning needs feedback. RC servos integrate control; smart servos add packet commands and status. Steppers with current-limiting drivers suit positioning with predictable loads. BLDC motors need electronic commutation or an ESC, not a two-wire DC connection. FOC is a later specialist topic."
+      ]
+    ],
+    "example": "A 0.2 kg load at the end of a horizontal 0.10 m arm needs approximately 0.2 × 9.81 × 0.10 = 0.196 N·m just to hold the load. This excludes the arm’s weight, acceleration, friction and margin. Choosing a servo with exactly this stall torque is insufficient.",
+    "diagram": "Load / travel / speed → force and torque → motor + transmission\n→ driver and supply → continuous-operation and fault tests",
+    "steps": [
+      "Choose a car, gripper or turntable. Describe its load and motion.",
+      "Draw dimensions and calculate static force or torque, listing omitted effects.",
+      "Compare DC, RC servo, smart servo and stepper options. Give two reasons for your choice.",
+      "Check rated operating conditions and driver needs, not just the largest advertised number.",
+      "Plan a gradual test of adequacy instead of applying full speed and load immediately."
+    ],
+    "evidence": "A requirements sheet, mechanical calculation, actuator comparison and validation plan.",
+    "understand": [
+      "I can calculate torque from arm length and load.",
+      "I can distinguish rated torque from stall torque.",
+      "I can choose an actuator for a task rather than just a model name."
+    ],
+    "quiz": [
+      "If wheel radius doubles at constant torque, what happens to ground force?",
+      "Why does a horizontal loaded arm need more holding torque than one hanging vertically?",
+      "Can a BLDC motor be connected as a two-wire brushed DC motor?"
+    ],
+    "challenge": "Propose a second transmission for the same task and compare ratio, backlash, speed and cost.",
+    "gear": "A breadboard, multimeter and basic components; paper calculations are also useful.",
+    "code": "",
+    "refs": [],
+    "fault": "If the result differs from your prediction, disconnect power and check the wiring, units and component specifications. Change one thing at a time, then repeat the measurement.",
+    "terms": [
+      [
+        "torque",
+        "扭矩"
+      ],
+      [
+        "backlash",
+        "齒隙"
+      ],
+      [
+        "inertia",
+        "慣性"
+      ],
+      [
+        "actuator",
+        "致動器"
+      ]
+    ]
+  },
+  {
+    "title": "DC motors and H-bridges",
+    "goal": "Understand and test your existing 310 encoder-motor system.",
+    "concepts": [
+      [
+        "Separate energy from commands",
+        "An H-bridge changes the polarity across a motor using power switches. PWM, direction pins or UART carry commands, not motor power. Brake and coast behaviour depends on the driver’s truth table; PWM = 0 does not mean the same thing on every board."
+      ],
+      [
+        "Back EMF and startup current",
+        "A spinning motor produces back EMF related to speed. At startup or when stalled, back EMF is small and current can greatly exceed the no-load value. Braking and reversal can return energy to the supply. Drivers, wiring and power sources must handle the actual conditions."
+      ],
+      [
+        "Learn from the existing module",
+        "The corresponding Yahboom four-channel board includes a controller. Start with its official protocol and your working software. Identify whether commands mean PWM, rpm or mm/s and whether the mode is open-loop or closed-loop. Do not invent packet formats."
+      ],
+      [
+        "Encoders make motion observable",
+        "A/B channels provide direction and increments. Count definitions may use one, two or four edges per cycle and must include gearing. Determine counts per output-shaft revolution; “13 lines” does not automatically mean 13 counts per wheel revolution."
+      ]
+    ],
+    "example": "If your motor exactly matches MD310Z20_7.4V, its official specification lists 7.4 V, 1:20 gearing, rated current ≤0.65 A and stall current ≤1.4 A. Four listed stall currents total 5.6 A, but that alone does not determine the whole vehicle’s battery or fuse selection.",
+    "diagram": "Battery → H-bridge → motor\nController → command interface → H-bridge\nEncoder A/B → motor controller → reported speed",
+    "steps": [
+      "Verify the exact motor, board and battery specifications and save existing settings.",
+      "Secure the car with wheels raised. Prepare a way to cut motor power and test only one wheel.",
+      "Start slowly and test stopping. Let it stop before reversing; do not stall it by hand.",
+      "Record target and reported speeds and compare the four wheels under the same command.",
+      "Check stop mode and communication timeout before any autonomous ground test."
+    ],
+    "evidence": "A verified hardware table, one-wheel direction/stop test and target-versus-reported speed records.",
+    "understand": [
+      "I can explain an H-bridge and back EMF.",
+      "I can check a driver against startup and continuous current needs.",
+      "I can distinguish speed commands from PWM commands."
+    ],
+    "quiz": [
+      "Why can startup current be much higher than running current?",
+      "Does PWM = 0 always mean braking?",
+      "Why must encoder counts include the decoding method and gearbox?"
+    ],
+    "challenge": "Use command and reply logs to investigate unequal wheel speeds. Check directions and units before tuning control gains.",
+    "gear": "Your existing car, 310 motors, four-channel board and verified power supply.",
+    "code": "",
+    "refs": [
+      "motor",
+      "quad"
+    ],
+    "fault": "If the result differs from your prediction, disconnect power and check the wiring, units and component specifications. Change one thing at a time, then repeat the measurement.",
+    "terms": [
+      [
+        "back EMF",
+        "反電動勢"
+      ],
+      [
+        "stall current",
+        "堵轉電流"
+      ],
+      [
+        "coast",
+        "滑行"
+      ],
+      [
+        "encoder",
+        "編碼器"
+      ]
+    ]
+  },
+  {
+    "title": "RC servos and smart servos",
+    "goal": "Distinguish pulse-position commands from digital packets and plan compatible power and communication.",
+    "concepts": [
+      [
+        "An RC servo’s signal wire carries a command",
+        "Common positional RC servos use repeated pulse width to set a target, unlike high-frequency DC motor power PWM. 1.5 ms centre pulses and 50 Hz are common examples, but check voltage, frequency, pulse range and travel for the model. A continuous-rotation servo usually maps pulse width to speed/direction instead of position."
+      ],
+      [
+        "Power and mechanical travel",
+        "An internal motor can draw substantial startup or obstruction current. Use a correctly rated load supply and common ground, not a GPIO or tiny 3V3 regulator. Remove linkages or clear the travel path for first motion. Test a small range without driving into end stops."
+      ],
+      [
+        "Smart servos use data",
+        "An ID selects a device, commands access parameters, and replies can report position or status. Match the protocol, control table and electrical interface. The AX-18A example uses Protocol 1.0 and half-duplex TTL, with 9–12 V supply and 11.1 V recommended. ESP32 control needs an appropriate half-duplex level interface; do not treat DATA as PWM or simply short TX to RX."
+      ],
+      [
+        "Read before moving",
+        "Start with one device: ping it and read its identity and status. Confirm ID, baud rate, interface and supply before setting conservative movement limits. Torque Off removes holding force, so support loaded structures. A speed value of zero can have a special meaning rather than stop."
+      ]
+    ],
+    "example": "At 50 Hz, the period is 20 ms and a 1.5 ms pulse has 7.5% duty. This example only tries 1.4/1.5/1.6 ms, subject to servo compatibility. For AX, a computer or Pi can use U2D2’s TTL port with a separate suitable supply; U2D2 does not power the servo load. A typical fully charged 3S lithium pack is 12.6 V, so its nominal 11.1 V does not establish compatibility with a 9–12 V range.",
+    "diagram": "RC: GPIO → compatible signal input; external supply → servo power\nAX: Pi / computer → U2D2 TTL → AX data\n    suitable separate supply → AX power",
+    "steps": [
+      "Choose a documented RC servo and verify supply, signal HIGH threshold and pulse range. Without hardware, examine the signal only.",
+      "Verify GPIO3 is available, remove its previous LED use, and provide a compatible external servo supply with common ground.",
+      "Clear the motion path before uploading. Send c/l/r in Serial Monitor. Power-up can immediately move the servo to the commanded position.",
+      "For a smart servo, connect one unit to a verified U2D2 setup and supply. Use official ROBOTIS tools or SDK to read it, keeping torque disabled and supporting any load.",
+      "Compare the interfaces. Before direct ESP32-to-AX control, review the half-duplex converter’s levels, direction control and transmit-completion timing, then try a ping."
+    ],
+    "evidence": "An interface comparison, RC supply/pulse checks and an optional read-only AX communication record.",
+    "understand": [
+      "I can distinguish RC pulses from smart-servo packets.",
+      "I know servo power and signal compatibility must be checked separately.",
+      "I can explain half-duplex communication and the consequences of losing holding torque."
+    ],
+    "quiz": [
+      "What duty cycle corresponds to 1.5 ms at 50 Hz?",
+      "Why can AX DATA not connect directly as an ESP32 PWM output?",
+      "Why does a nominal 11.1 V battery require a full-charge voltage check?"
+    ],
+    "challenge": "Compare RC and smart servos for a gripper: feedback, wiring, supply, diagnostics and cost.",
+    "gear": "An optional RC servo with compatible supply; AX-18A, U2D2 and its supply are a separate optional branch.",
+    "code": "// Arduino-ESP32 3.x; only for a verified compatible positional RC servo.\n// GPIO3 drives a compatible signal input only; use suitable external servo power and common ground.\nconst int SERVO_PIN=3;\nbool ready=false;\nvoid pulseUs(unsigned int us) {\n  // 50 Hz = 20000 us; 14-bit duty scale = 16384.\n  if (ready) ledcWrite(SERVO_PIN,(uint32_t)us*16384UL/20000UL);\n}\nvoid setup() {\n  Serial.begin(115200);\n  ready=ledcAttach(SERVO_PIN,50,14);\n  if (ready) pulseUs(1500);\n  else Serial.println(\"PWM CONFIG FAILED\");\n}\nvoid loop() {\n  if (Serial.available()) {\n    char c=Serial.read();\n    if (c=='c') pulseUs(1500);\n    if (c=='l') pulseUs(1400);\n    if (c=='r') pulseUs(1600);\n  }\n}\n",
+    "refs": [
+      "servo",
+      "pwm",
+      "ax",
+      "u2d2",
+      "dxlprotocol",
+      "dxlsdk"
+    ],
+    "fault": "For RC jitter, check supply, common ground, pulse width and load. For missing AX replies, check TTL port, power, ID, baud rate, protocol and half-duplex direction before enabling torque or resetting parameters.",
+    "terms": [
+      [
+        "pulse width",
+        "脈衝寬度"
+      ],
+      [
+        "half-duplex",
+        "半雙工"
+      ],
+      [
+        "holding torque",
+        "保持扭矩"
+      ],
+      [
+        "control table",
+        "控制表"
+      ]
+    ]
+  },
+  {
+    "title": "Stepper motors",
+    "goal": "Understand STEP/DIR, current limits, missed steps and homing, then test one free shaft conservatively.",
+    "concepts": [
+      [
+        "Pulses and shaft angle",
+        "A bipolar stepper usually has two coils driven in sequence. A 1.8° full step gives 200 steps per turn. At 1/16 microstepping, one commanded revolution uses 3200 pulses. Microsteps improve smoothness and command resolution, but do not guarantee a proportional increase in mechanical accuracy."
+      ],
+      [
+        "Use a compatible current-limiting driver",
+        "Set coil current using the actual board and sense-resistor values. Different A4988 clone boards may use different Vref relationships. The coil’s rated voltage is not necessarily the required supply voltage for a chopper driver; observe driver input limits and motor current and temperature limits."
+      ],
+      [
+        "Verify wiring and power",
+        "With power off, use resistance mode to identify each coil pair. Do not connect or disconnect motor wires while powered. On the referenced Pololu A4988 board, logic VDD and VMOT are separate, and nearby decoupling and bulk capacitance help handle spikes. Follow the documentation for your own board."
+      ],
+      [
+        "Open-loop position can be wrong",
+        "Excessive acceleration, load or unsuitable current can cause missed steps even while software believes the move is complete. Startup position is normally unknown. Homing uses a reference: approach, back off, re-approach slowly and set zero, with maximum time and travel limits."
+      ]
+    ],
+    "example": "A 1.8° motor at 1/16 microstepping and an 8 mm-lead screw gives 3200 / 8 = 400 pulses/mm. Moving 10 mm needs 4000 pulses; 20 mm/s needs 8000 pulses/s. This geometry excludes missed steps, backlash and controller throughput limits.",
+    "diagram": "ESP32 STEP / DIR → compatible driver → two motor coils\nLogic supply → VDD; motor supply → VMOT (check actual board)\nLimit switch → bounded homing state machine",
+    "steps": [
+      "Read the motor and driver documents and identify both coil pairs with all power removed.",
+      "Set a conservative current limit using the manufacturer’s method, fit required capacitors, and verify logic levels and pulse width.",
+      "Use only an unloaded free shaft for the first test, with the compatible AccelStepper library and the example below. Do not fit a linear stage yet.",
+      "Test low-speed forward and return motion, mark shaft position, and record the microstep setting.",
+      "Before connecting travel-limited mechanics, implement limit switches and homing with time and distance bounds. This free-shaft example is not a complete positioning controller."
+    ],
+    "evidence": "Coil identification, current-limit basis, microstep setting and low-speed return-position observations.",
+    "understand": [
+      "I can convert between pulses, angle and linear travel.",
+      "I know microstep resolution is not equal to positioning accuracy.",
+      "I can explain current limiting, missed steps and homing."
+    ],
+    "quiz": [
+      "How many pulses make one turn at 1.8° and 1/16 microstepping?",
+      "Why must motor wiring not be unplugged while powered?",
+      "What should homing do if a switch never triggers?"
+    ],
+    "challenge": "Use a button to simulate a limit switch and verify that a missing trigger causes a timeout. Do not crash a mechanism into an end stop.",
+    "gear": "A bipolar stepper, compatible STEP/DIR driver, suitable power and capacitors; a limit switch is optional for the first free-shaft test.",
+    "code": "#include <AccelStepper.h>\n// Standalone unloaded free-shaft demo; not for an unhomed linear stage.\n// Verify GPIO3=STEP and GPIO4=DIR; wire EN/SLEEP/RESET as the actual driver requires.\nAccelStepper motor(AccelStepper::DRIVER,3,4);\nvoid setup() {\n  Serial.begin(115200);\n  motor.setMinPulseWidth(5); // us; must still meet your driver specifications.\n  motor.setMaxSpeed(200);    // command pulses/s, not rpm\n  motor.setAcceleration(100); // command pulses/s^2\n}\nvoid loop() {\n  motor.run(); // Call frequently; do not add long delays.\n  if (Serial.available()) {\n    char c=Serial.read();\n    if (c=='x') motor.stop(); // Decelerated stop, not a hardware emergency stop.\n    if (motor.distanceToGo()==0) {\n      if (c=='f') motor.move(200);\n      if (c=='b') motor.move(-200);\n    }\n  }\n}\n",
+    "refs": [
+      "stepper",
+      "accel"
+    ],
+    "fault": "If it vibrates without rotating, disconnect power and check coil pairing, then current limit, driver state and pulses. Reduce speed and acceleration when steps are missed. Do not compensate indefinitely by raising current or unplug wiring while powered.",
+    "terms": [
+      [
+        "microstepping",
+        "微步"
+      ],
+      [
+        "missed step",
+        "失步"
+      ],
+      [
+        "homing",
+        "回原點"
+      ],
+      [
+        "lead",
+        "導程"
+      ]
+    ]
+  },
+  {
+    "title": "Feedback and closed-loop control",
+    "goal": "Explain P, PI and PID, and evaluate control with measurements instead of random tuning.",
+    "concepts": [
+      [
+        "Control starts with error",
+        "e = target − measurement. The controller adjusts output using this error. Confirm units and direction first: a positive command with negative measured speed may create positive feedback. Targets, measurements and outputs have different meanings; do not mix rpm and PWM."
+      ],
+      [
+        "The roles of P, I and D",
+        "P reacts to present error; too much can cause oscillation. I accumulates error and can reduce steady-state offset, but may wind up. D responds to rate of change and can add damping, but is noise-sensitive. Start wheel-speed learning with P and then PI rather than enabling everything at once."
+      ],
+      [
+        "Sampling, limits and anti-windup",
+        "Integration must account for the time interval dt. Physical output is limited, so the integral must not accumulate indefinitely during saturation. Define what happens to integral state on stop, fault and mode changes. Filter delay also affects control behaviour."
+      ],
+      [
+        "Evaluate with metrics",
+        "Record rise time, overshoot, steady-state error and disturbance recovery. Change one parameter at a time, beginning with a model or low-risk prototype. An existing driver may already perform PI; do not add a second equivalent loop without understanding its role."
+      ]
+    ],
+    "example": "For a 100 rpm target and 80 rpm measurement, error is 20 rpm. With Kp = 0.5 command units/rpm, proportional output is 10 command units. It is not necessarily 10 V or 10% PWM: define the output scale.",
+    "diagram": "Target → [error = target − measured] → controller → driver + motor\n                  ↑                                      │\n                  └──────── sensor feedback ─────────────┘",
+    "steps": [
+      "Calculate errors for three target/measurement pairs and verify the sign.",
+      "Run the pure Python model below with different Kp values. No motor is connected.",
+      "Observe the remaining error with proportional control, then add a small Ki and output limits.",
+      "For your existing board, log target and measured speeds and identify its internal mode before changing unknown PID settings.",
+      "Define acceptable steady-state error and overshoot, then evaluate the records against those limits."
+    ],
+    "evidence": "Plots or tables comparing gains, steady-state error and response to a load change.",
+    "understand": [
+      "I can explain the roles of P, I and D.",
+      "I know integration needs dt and saturation handling.",
+      "I can evaluate control performance using data."
+    ],
+    "quiz": [
+      "What is the error at a target of 100 rpm and a measurement of 80 rpm?",
+      "Why can the integral cause trouble at an output limit?",
+      "Why should an existing closed-loop driver be understood before adding another loop?"
+    ],
+    "challenge": "Change the model’s load and compare responses with and without integration. Do not copy model gains directly to a real car.",
+    "gear": "Optional Python 3 and wheel-speed records from the existing driver.",
+    "code": "# Teaching model only; no hardware interface. u is an abstract command from 0 to 100.\ndt=0.01\nkp,ki=1.0,0.6\nspeed=0.0\nintegral=0.0\nfor k in range(800):\n    target=50.0\n    error=target-speed\n    candidate=integral+error*dt\n    raw=kp*error+ki*candidate\n    u=max(0.0,min(100.0,raw))\n    # Conditional integration: when saturated, only integrate towards the valid range.\n    if raw==u or (raw>100 and error<0) or (raw<0 and error>0):\n        integral=candidate\n    load=5.0 if k<400 else 15.0\n    speed += ((u-speed-load)/0.3)*dt\n    speed=max(0.0,speed)\n    if k%20==0:\n        print(round(k*dt,2),round(speed,2),round(u,2))\n",
+    "refs": [],
+    "fault": "If the result differs from your prediction, disconnect power and check the wiring, units and component specifications. Change one thing at a time, then repeat the measurement.",
+    "terms": [
+      [
+        "feedback",
+        "回授"
+      ],
+      [
+        "overshoot",
+        "超越量"
+      ],
+      [
+        "saturation",
+        "飽和"
+      ],
+      [
+        "steady-state error",
+        "穩態誤差"
+      ]
+    ]
+  },
+  {
+    "title": "Motion and coordinate systems",
+    "goal": "Convert wheel speed correctly and derive motion from the actual wheel arrangement.",
+    "concepts": [
+      [
+        "Define units and positive directions",
+        "This course uses body x forward, y left and positive angular velocity ω counterclockwise. Other software may differ. State metres, seconds, radians and rpm explicitly; mm/s and m/s are not interchangeable."
+      ],
+      [
+        "Encoder counts to rim speed",
+        "If the output shaft has N counts/revolution and count change ΔC over Δt, rpm = 60ΔC/(NΔt). Wheel rim speed s = πD × rpm/60. Omni B60 nominal diameter is 60 mm and radius 30 mm: do not swap them."
+      ],
+      [
+        "Omni wheels are not mecanum wheels",
+        "Wheel speeds depend on wheel location, driven direction and roller geometry. A standard omni wheel’s free-rolling direction differs from its driven direction. Not every four-wheel arrangement can control all three planar degrees of freedom."
+      ],
+      [
+        "Ideal kinematics is not perfect ground motion",
+        "For an ideal standard omni wheel at (xi, yi) with unit driven direction ti, si = tix·vx + tiy·vy + (−tix·yi + tiy·xi)ω, and wheel angular speed is si/r. This expression is not a direct mecanum formula. Slip and wheel-size errors require measurement."
+      ]
+    ],
+    "example": "A 60 mm wheel at 300 rpm has a rim speed of approximately 0.942 m/s. Using its 30 mm radius as the diameter gives half that result. This does not guarantee the whole car travels at 0.942 m/s in every direction.",
+    "diagram": "Body frame: +x forward, +y left, +ω counterclockwise\nEach wheel: location (xi, yi), driven direction ti, radius r\nEncoder counts → wheel rpm → rim speed → vehicle model",
+    "steps": [
+      "Draw the chassis from above. Label wheel numbers, positions, driven directions and positive rotation.",
+      "Confirm the actual encoder count definition and wheel diameter.",
+      "Secure the chassis with wheels raised and test directions one wheel at a time at low speed.",
+      "Predict wheel directions for forward, sideways and rotational motion, then verify slowly in a controlled area.",
+      "Record slip and deviations. If the layout cannot support a direction, change the mechanism or requirement rather than randomly changing signs."
+    ],
+    "evidence": "A labelled chassis diagram, speed conversions and low-speed direction checks.",
+    "understand": [
+      "I can convert counts, rpm and wheel rim speed.",
+      "I can clearly define positive directions for the chassis and wheels.",
+      "I will not interchange omni and mecanum formulas."
+    ],
+    "quiz": [
+      "What error results from using radius in a diameter formula?",
+      "Can any four omni-wheel layout move sideways?",
+      "What determines the sign of a wheel’s speed during pure rotation?"
+    ],
+    "challenge": "Choose one wheel and calculate the sign of its pure-rotation command from the general expression. Compare with your drawing.",
+    "gear": "Your existing car or a chassis drawing.",
+    "code": "",
+    "refs": [
+      "motor"
+    ],
+    "fault": "If the result differs from your prediction, disconnect power and check the wiring, units and component specifications. Change one thing at a time, then repeat the measurement.",
+    "terms": [
+      [
+        "coordinate frame",
+        "座標系"
+      ],
+      [
+        "kinematics",
+        "運動學"
+      ],
+      [
+        "rim speed",
+        "輪周速度"
+      ],
+      [
+        "slip",
+        "打滑"
+      ]
+    ]
+  },
+  {
+    "title": "Integrating multiple devices",
+    "goal": "Build an architecture whose power, communication and control can be verified in stages.",
+    "concepts": [
+      [
+        "Write interface contracts",
+        "For each module, state inputs, outputs, units, ranges, update rate, timeout, startup state and fault behaviour. Know the origin and validity of received data instead of exchanging unnamed numbers."
+      ],
+      [
+        "Control rate and communication throughput",
+        "With UART 8N1, a character commonly uses 10 bits. At 115200 bit/s, the theoretical ceiling is about 11520 bytes/s, before processing and protocol overhead. Sending 200 bytes every 10 ms needs 20000 bytes/s and already exceeds that ceiling."
+      ],
+      [
+        "Power and return paths",
+        "Use appropriate wires, connectors and branches for high-current loads. Avoid routing sensitive measurement returns through thin paths carrying large changing current. Shared ground and return routing both matter. Test simultaneous startup; separate success does not prove combined success."
+      ],
+      [
+        "Divide responsibilities clearly",
+        "The Pi can handle vision and higher-level logic; a controller maintains low-level work and timeouts. The existing motor board may already do some of this. Add another controller only to meet a specific need."
+      ]
+    ],
+    "example": "Sensing at 20 Hz, reporting at 10 Hz and leaving wheel-speed control on the existing board is a possible starting architecture, not a universal standard. Calculate traffic and measure latency before selecting rates.",
+    "diagram": "Sensor → validated data → high-level decision\n                         ↓\n                motor controller → actuators\n                local timeout / fault response",
+    "steps": [
+      "Choose two individually verified functions and write their interface contracts.",
+      "Calculate bytes per second and avoid letting logging dominate the control loop.",
+      "Integrate signals first, using LEDs to simulate actions.",
+      "Add one real load while monitoring power and response, then add other loads gradually.",
+      "Disconnect communication or simulate stale data and verify the defined response."
+    ],
+    "evidence": "An interface table, traffic budget and staged integration/fault test records.",
+    "understand": [
+      "I can define units and data expiry for a module.",
+      "I can estimate serial bandwidth.",
+      "I know separate success does not prove successful integration."
+    ],
+    "quiz": [
+      "Can 115200-baud 8N1 carry 200 bytes every 10 ms?",
+      "Why does common ground still require attention to return routing?",
+      "Where should loss-of-command handling run?"
+    ],
+    "challenge": "Add a sensor concept to your car and identify which control tasks it must not block.",
+    "gear": "A breadboard, multimeter and basic components; paper calculations are also useful.",
+    "code": "",
+    "refs": [],
+    "fault": "If the result differs from your prediction, disconnect power and check the wiring, units and component specifications. Change one thing at a time, then repeat the measurement.",
+    "terms": [
+      [
+        "interface contract",
+        "介面規約"
+      ],
+      [
+        "throughput",
+        "吞吐量"
+      ],
+      [
+        "return path",
+        "回流路徑"
+      ],
+      [
+        "integration",
+        "整合"
+      ]
+    ]
+  },
+  {
+    "title": "Systematic debugging",
+    "goal": "Separate power, signals, software and mechanics, and use repeatable comparisons.",
+    "concepts": [
+      [
+        "Begin with observations",
+        "“The motor is broken” is a conclusion. “The wheel does not turn after a command and supply voltage falls to this value” is an observation. Record when it happens, frequency, conditions, recent changes and how to reproduce it."
+      ],
+      [
+        "Investigate four areas",
+        "Power: voltage, drop, current limiting and backfeeding. Signals: levels, interface, wiring and waveforms. Software: states, units, timeouts and version. Mechanics: friction, fasteners, load, backlash and slip."
+      ],
+      [
+        "Know your instruments’ limits",
+        "A multimeter suits static or average readings; a logic analyser shows digital timing; an oscilloscope shows voltage waveforms. Check input limits and grounding. A scope ground clip may connect to earth and must not be attached arbitrarily to an H-bridge switching node."
+      ],
+      [
+        "Change one thing at a time",
+        "Keep a known-good version and compare A with B. One successful run does not establish the cause; repeat the original triggering conditions. Do not hide an unknown fault by randomly adding delays, capacitors or PID gain changes."
+      ]
+    ],
+    "example": "If the Pi restarts when a motor starts, record timing and supply behaviour, then retest with a known-good cable. Improvement supports a voltage-drop hypothesis but needs repetition. A multimeter showing no dip cannot rule out a brief transient.",
+    "diagram": "Observation → testable hypothesis → one change → repeat test\n→ measured result → conclusion and remaining uncertainty",
+    "steps": [
+      "Choose a small real problem and write exact reproduction conditions.",
+      "List at least one plausible hypothesis in each of the four areas.",
+      "Choose a low-risk reversible test, such as replacing the load with an LED or using a known-good cable.",
+      "Compare before and after. Restore the original setup if the change does not help.",
+      "Write a report that another person can reproduce."
+    ],
+    "evidence": "A table of observations, hypotheses, changes, measurements and conclusions, including unresolved possibilities.",
+    "understand": [
+      "I can distinguish observations from hypotheses.",
+      "I can choose a one-variable comparison test.",
+      "I know what my instruments can and cannot reveal."
+    ],
+    "quiz": [
+      "Can a normal voltage reading rule out a supply-related restart?",
+      "Why must a scope ground clip not be placed arbitrarily on an H-bridge?",
+      "Can you identify the cause after changing three things at once?"
+    ],
+    "challenge": "For servo jitter, missed stepper steps and a drifting car, write the first measurement you would make.",
+    "gear": "A breadboard, multimeter and basic components; paper calculations are also useful.",
+    "code": "",
+    "refs": [],
+    "fault": "If the result differs from your prediction, disconnect power and check the wiring, units and component specifications. Change one thing at a time, then repeat the measurement.",
+    "terms": [
+      [
+        "hypothesis",
+        "假設"
+      ],
+      [
+        "transient",
+        "瞬態"
+      ],
+      [
+        "reproduce",
+        "重現"
+      ],
+      [
+        "known-good",
+        "已知正常"
+      ]
+    ]
+  },
+  {
+    "title": "Turn an idea into requirements",
+    "goal": "Turn “I want to build a car” into measurable requirements.",
+    "concepts": [
+      [
+        "Describe the use case first",
+        "Who uses it, on what surface, with what payload and for how long? Decide the purpose before selecting components."
+      ],
+      [
+        "Replace adjectives with numbers",
+        "Fast, accurate and stable need measurement methods. For example, travel 1 m on a named surface with final deviation below a limit you choose."
+      ],
+      [
+        "Constraints are requirements too",
+        "Record size, budget, existing battery, tools and time. Mark unknown performance as needing a test rather than assuming it is achieved."
+      ],
+      [
+        "Separate essentials from extensions",
+        "The first version should complete one main task. Vision navigation, wireless control and precise positioning can be validated separately and added later."
+      ]
+    ],
+    "example": "A small delivery car could move a specified object 1 m, start from a button and stop when commands expire. Assign measurable targets for mass, speed, deviation and stopping time, and name the test surface.",
+    "diagram": "Use case → measurable targets → constraints → acceptance tests",
+    "steps": [
+      "Choose a device you want to build and describe its purpose in one sentence.",
+      "List its environment, load and operator.",
+      "Write three essential functions and two postponed features.",
+      "Give each essential function a measurement method and pass condition.",
+      "Identify unknowns and plan the smallest useful experiment for each."
+    ],
+    "evidence": "A one-page table of requirements, target values, test methods, priorities and unknowns.",
+    "understand": [
+      "I can turn vague descriptions into measurable conditions.",
+      "I can distinguish functions from component choices.",
+      "I know which problem the first version should solve."
+    ],
+    "quiz": [
+      "What information is missing from “the car must be stable”?",
+      "Why can choosing a motor before defining payload cause trouble?",
+      "How would you verify loss-of-command stopping?"
+    ],
+    "challenge": "Write indoor and outdoor versions of the same project and identify three changed requirements.",
+    "gear": "Existing hardware, datasheets, notes and measurement tools.",
+    "code": "",
+    "refs": [],
+    "fault": "If the result differs from your prediction, disconnect power and check the wiring, units and component specifications. Change one thing at a time, then repeat the measurement.",
+    "terms": [
+      [
+        "requirement",
+        "需求"
+      ],
+      [
+        "constraint",
+        "限制"
+      ],
+      [
+        "payload",
+        "載荷"
+      ],
+      [
+        "acceptance test",
+        "驗收測試"
+      ]
+    ]
+  },
+  {
+    "title": "Choose hardware and allocate resources",
+    "goal": "Justify choices with specifications and resource tables, not board names.",
+    "concepts": [
+      [
+        "Build a compatibility matrix",
+        "For every device, record supply range, logic levels, interface, current and connector. All relevant conditions must be met before connecting devices."
+      ],
+      [
+        "Count more than GPIO pins",
+        "Include PWM channels, UARTs, timers, ADC inputs, memory, update rate and reserved pins. Boot-strapping and USB pins cannot be assigned without checking their other roles."
+      ],
+      [
+        "Where a C3 SuperMini fits",
+        "It is a useful starting board for LEDs, buttons, sensors and individual actuators. SuperMini is a board nickname, not a fixed specification. Check the actual pinout, regulator and built-in LED. For multiple motors and encoders, count resources before choosing a larger ESP32 board or dedicated controller."
+      ],
+      [
+        "Reuse existing control hardware",
+        "Your four-channel board may already handle PWM, encoders and control loops while the Pi sends targets. The ESP32 can remain a separate learning board until a specific need for real-time I/O or extra features justifies adding it."
+      ]
+    ],
+    "example": "Four A/B encoders need eight inputs. If each motor driver also uses two control lines, the total reaches sixteen before communication and sensors. A four-channel board with its own controller may require only a host communication interface. These are different architectures.",
+    "diagram": "Requirements → voltage / current / interface checks\n             → pin and peripheral budget → architecture decision",
+    "steps": [
+      "List exact module models and official documentation.",
+      "Build a compatibility table for supply, levels, current and interfaces.",
+      "Draw the pin allocation and mark reserved pins.",
+      "Estimate worst-case load, traffic and control update needs.",
+      "Record reasons for each choice and anything not yet verified."
+    ],
+    "evidence": "A compatibility table, GPIO map, power budget and responsibility diagram.",
+    "understand": [
+      "I do not treat SuperMini as a fixed specification.",
+      "I can calculate pin and interface requirements.",
+      "I can explain whether the Pi and motor board really need an ESP32."
+    ],
+    "quiz": [
+      "What must be checked before connecting four encoders directly to a C3?",
+      "Does matching supply voltage prove compatibility?",
+      "How does an onboard motor controller change GPIO demand?"
+    ],
+    "challenge": "Compare Pi + four-channel control board with Pi + ESP32 + separate drivers in cost, complexity and testability.",
+    "gear": "Existing hardware, datasheets, notes and measurement tools.",
+    "code": "",
+    "refs": [
+      "c3",
+      "quad"
+    ],
+    "fault": "If the result differs from your prediction, disconnect power and check the wiring, units and component specifications. Change one thing at a time, then repeat the measurement.",
+    "terms": [
+      [
+        "resource budget",
+        "資源預算"
+      ],
+      [
+        "peripheral",
+        "周邊"
+      ],
+      [
+        "compatibility",
+        "相容性"
+      ],
+      [
+        "allocation",
+        "分配"
+      ]
+    ]
+  },
+  {
+    "title": "Build a minimal prototype",
+    "goal": "Make one complete functional path reliable before expanding it.",
+    "concepts": [
+      [
+        "Start with one load",
+        "Begin with an LED, then one motor or sensor. Keep known-good wiring and software at each step instead of adding everything at once."
+      ],
+      [
+        "Validate in layers",
+        "Stable power → individual I/O → communication → actuator → feedback → integration. Give each layer a pass condition so you can return to it when the next layer fails."
+      ],
+      [
+        "Define control boundaries",
+        "Start with outputs in a safe state, limit command ranges, stop on expired commands and require a clear recovery action after a fault."
+      ],
+      [
+        "Save a reproducible version",
+        "Keep wiring photographs, pin maps, program versions, parameters and test conditions. “It worked this time” is not enough documentation."
+      ]
+    ],
+    "example": "For the car, start with one raised wheel moving slowly and stopping, then read its encoder, then validate wheel-speed feedback. Test communication loss and restart before expanding to all four wheels.",
+    "diagram": "Known-good baseline → one input-to-output path → normal tests\n→ fault tests → saved version → next feature",
+    "steps": [
+      "Back up the working car and its program.",
+      "Choose one minimal functional path and draw input to output.",
+      "Wire, power and measure one layer at a time.",
+      "Test normal commands, invalid commands, lost communication and restart.",
+      "Repeat from your written instructions on a blank record sheet and identify missing details."
+    ],
+    "evidence": "A reproducible minimal prototype, version record and normal/fault test results.",
+    "understand": [
+      "I can define pass conditions for each stage.",
+      "I can safely return to a known-good version.",
+      "I know the required output behaviour on restart and communication loss."
+    ],
+    "quiz": [
+      "Why test one wheel first?",
+      "Is success during normal operation enough?",
+      "What does a teammate need to reproduce your prototype?"
+    ],
+    "challenge": "Ask a teammate to reproduce an LED controller using only your notes, then improve any unclear instructions.",
+    "gear": "Existing hardware, datasheets, notes and measurement tools.",
+    "code": "",
+    "refs": [],
+    "fault": "If the result differs from your prediction, disconnect power and check the wiring, units and component specifications. Change one thing at a time, then repeat the measurement.",
+    "terms": [
+      [
+        "prototype",
+        "原型"
+      ],
+      [
+        "baseline",
+        "基準版本"
+      ],
+      [
+        "recovery",
+        "恢復"
+      ],
+      [
+        "reproducible",
+        "可重做"
+      ]
+    ]
+  },
+  {
+    "title": "Final project and verification",
+    "goal": "Complete an independent project with requirements, evidence and stated limits.",
+    "concepts": [
+      [
+        "Choose your project",
+        "Options include a sensor-controlled fan, a small angle-positioning mechanism, a linear stage or an improvement to your omni-wheel car. Choose something you can verify with available tools and manageable size and energy."
+      ],
+      [
+        "Test against requirements",
+        "Each requirement needs a corresponding test. Mark pass, fail or not tested. A video that looks correct is not a replacement for measurement."
+      ],
+      [
+        "Repeat normal and fault tests",
+        "Repeat under the same conditions, then test restart, invalid commands and communication loss. Increase load gradually within verified ratings."
+      ],
+      [
+        "Explain limits and next steps",
+        "Being able to identify what you do not know or have not tested is part of independent engineering. Later study may cover control theory, RTOS, mechanisms or circuit design. This course does not require PCB fabrication."
+      ]
+    ],
+    "example": "An omni-car submission can include a hardware table, power and signal diagrams, one-wheel tests, speed calibration, movement tests and timeout-stop records. Do not claim precise positioning if ground slip has not been measured.",
+    "diagram": "Requirement → implementation → test → evidence → result\nUnverified item → stated limit → next experiment",
+    "steps": [
+      "Choose your project and use the requirements sheet from Unit 25.",
+      "Complete the architecture, resource tables and minimal prototype.",
+      "Run each acceptance test and save observations or measurements.",
+      "Explain one fault and your investigation to a teammate.",
+      "Write operating instructions, known limits and priorities for the next version."
+    ],
+    "evidence": "A project folder containing requirements, wiring, specification sources, software, test results, operating instructions and limits.",
+    "understand": [
+      "I can explain the role of each major component.",
+      "I can support completion claims with test evidence.",
+      "I can identify unverified risks and the next experiment."
+    ],
+    "quiz": [
+      "How is a successful demonstration different from completed verification?",
+      "How should a failed requirement be recorded?",
+      "What must be checked again when changing to a larger motor?"
+    ],
+    "challenge": "Turn your project into a five-minute lesson showing a beginner how to start and how to test.",
+    "gear": "Existing hardware, datasheets, notes and measurement tools.",
+    "code": "",
+    "refs": [],
+    "fault": "If the result differs from your prediction, disconnect power and check the wiring, units and component specifications. Change one thing at a time, then repeat the measurement.",
+    "terms": [
+      [
+        "verification",
+        "驗證"
+      ],
+      [
+        "evidence",
+        "證據"
+      ],
+      [
+        "limitation",
+        "限制"
+      ],
+      [
+        "iteration",
+        "迭代"
+      ]
+    ]
+  }
+]
